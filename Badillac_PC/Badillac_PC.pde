@@ -1,6 +1,7 @@
-//Program by Jeremy Blum
-//www.jeremyblum.com
-//Give you the temperature
+/*
+Badillac-PC app by Kevin Bidwell. Thanks to jeremy blum for great tutorials on arduino
+and Processing.
+*/
 
 import processing.serial.*;
 Serial port;
@@ -14,7 +15,7 @@ PFont font;
 
 void setup()
 {
-  size(600,400);
+  size(800,600);
   port = new Serial(this, "COM3", 9600);
   port.bufferUntil('.'); 
   font = loadFont("ArialMT-48.vlw");

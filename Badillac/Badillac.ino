@@ -2,10 +2,10 @@
 Badillac Computer System by Kevin Bidwell
 */
 // Define All my Digital Input Pins
-int lineLock = 0;
-int raceMode = 1;
-int launchMode = 2;
-int speedo = 3;
+int lineLock = 2;
+int raceMode = 3;
+int launchMode = 4;
+int speedo = 5;
 // Define Analog Input Pins
 int oilTemp = A0;
 int waterTemp = A1;
@@ -21,6 +21,13 @@ int nosTempLED = 9;
 int shiftLED = 8;
 int oilPressureLED = 7;
 char nosOn[] = "Off";
+//Define varibles for printing to PC
+String data = "";
+String OT = "Oil Temp";
+String AT = "Air Temp";
+String NT = "NOS Temp";
+String WT = "Water Temp";
+String OP = "Oil Pres";
 
 void setup() {
   //Define the mode for all the input pins
@@ -41,17 +48,27 @@ void setup() {
 }
 
 void loop() {
+  printToPC();
+  brakeControls();
+  monitorTemps();
+  checkRaceMode();
+  delay(200);
+}
+
+void printToPC(){
+  data = "";
   //Send all Data to PC for Logging
   Serial.print(String(map(analogRead(oilTemp), 0, 1023, 0, 255)) + " Oil Temp ");
-  //Serial.print(",");
   Serial.print(String(map(analogRead(airTemp), 0, 1023, 0, 255)) + " Air Temp ");
   Serial.print(",");
   Serial.print(String(map(analogRead(nosTemp), 0, 1023, 0, 255)) + " Nos Temp ");
-  //Serial.print(",");
   Serial.print("NOS " + String(nosOn));
   Serial.print("|");
   Serial.print(String(map(analogRead(oilPressure), 0, 1023, 0, 255)) + " Oil Pres ");
   Serial.print(".");
+}
+
+void brakeControls(){
   //Define Launch Mode and Line Lock Functions
   if((digitalRead(lineLock) == LOW) && (digitalRead(launchMode) == LOW)){
     digitalWrite(lineLockFront, HIGH);
@@ -67,27 +84,27 @@ void loop() {
     digitalWrite(lineLockFront, LOW);
     digitalWrite(lineLockRear, LOW);
   }
-  
-  //Define Safe temps for racing and the LEDs for each
-  
-  if(analogRead(oilPressure) > 512){
+}
+
+void monitorTemps(){
+  //Check critial temps and pressures
+  if(map(analogRead(oilPressure), 0, 1023, 0, 255) > 100){
     digitalWrite(oilPressureLED, HIGH);
   }
   else {
     digitalWrite(oilPressureLED, LOW);
   }
   
-  if(analogRead(nosTemp) > 512){
+  if(map(analogRead(nosTemp), 0, 1023, 0, 255) > 100){
     digitalWrite(nosTempLED, HIGH);
   }
   else {
     digitalWrite(nosTempLED, LOW);
-  } 
-  
-  //End Safe Temp Monitors
-  
-  //Define Functions only to happen under race Mode
-  if(digitalRead(raceMode) == LOW){
+  }
+}
+
+void checkRaceMode(){
+    if(digitalRead(raceMode) == LOW){
     if(analogRead(nosTemp) < 512){
       digitalWrite(nosHeater, HIGH);
     } else {
@@ -108,6 +125,5 @@ void loop() {
       char nosOn[] = "Off";
     }
   }
-  delay(200);
 }
 
